@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculador de Despiece - Cocinas & Modulares</title>
+    <style>
+        :root { --primary: #2563eb; --bg: #f8fafc; --text: #1e293b; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        h1 { color: var(--primary); text-align: center; }
+        .info-tablero { background: #eff6ff; padding: 10px; border-radius: 8px; margin-bottom: 20px; font-weight: bold; text-align: center; border: 1px solid #dbeafe; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px; border-bottom: 1px solid #e2e8f0; text-align: left; }
+        input { width: 80px; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px; }
+        .btn { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; transition: 0.3s; width: 100%; font-size: 1rem; }
+        .btn:hover { background: #1d4ed8; }
+        .results { margin-top: 30px; padding: 20px; background: #f1f5f9; border-radius: 8px; }
+        .res-item { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 1.1rem; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Calculador de Material</h1>
+    <div class="info-tablero">Constante del Tablero: 2.40m x 1.80m (4.32 m²)</div>
+
+    <table id="tablaPiezas">
+        <thead>
+            <tr>
+                <th>Pieza</th>
+                <th>Largo (m)</th>
+                <th>Ancho (m)</th>
+                <th>Cant.</th>
+                <th>Subtotal</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><input type="text" placeholder="Ej: Lateral" style="width:120px"></td>
+                <td><input type="number" class="largo" step="0.01" value="0.00"></td>
+                <td><input type="number" class="ancho" step="0.01" value="0.00"></td>
+                <td><input type="number" class="cant" value="1"></td>
+                <td class="subtotal">0.00 m²</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <button class="btn" onclick="agregarFila()" style="margin: 15px 0; background: #64748b;">+ Agregar Pieza</button>
+    <button class="btn" onclick="calcularTodo()">CALCULAR DESPIECE</button>
+
+    <div class="results" id="resultadoArea">
+        <div class="res-item"><strong>Área Total Necesaria:</strong> <span id="totalM2">0.00</span> m²</div>
+        <div class="res-item"><strong>Láminas Sugeridas (Eficiencia 85%):</strong> <span id="totalLaminas" style="color:var(--primary); font-weight:bold;">0</span></div>
+        <p style="font-size: 0.85rem; color: #64748b; margin-top: 15px;">* Se incluye un 15% de margen por cortes (sierra de 3mm) y retales no aprovechables.</p>
+    </div>
+</div>
+
+<script>
+    const AREA_TABLERO = 2.40 * 1.80; // 4.32 m2
+
+    function agregarFila() {
+        const tbody = document.querySelector("#tablaPiezas tbody");
+        const nuevaFila = tbody.insertRow();
+        nuevaFila.innerHTML = `
+            <td><input type="text" placeholder="Pieza" style="width:120px"></td>
+            <td><input type="number" class="largo" step="0.01" value="0.00"></td>
+            <td><input type="number" class="ancho" step="0.01" value="0.00"></td>
+            <td><input type="number" class="cant" value="1"></td>
+            <td class="subtotal">0.00 m²</td>
+        `;
+    }
+
+    function calcularTodo() {
+        let areaTotalProyecto = 0;
+        const filas = document.querySelectorAll("#tablaPiezas tbody tr");
+
+        filas.forEach(fila => {
+            const l = parseFloat(fila.querySelector(".largo").value) || 0;
+            const a = parseFloat(fila.querySelector(".ancho").value) || 0;
+            const c = parseInt(fila.querySelector(".cant").value) || 0;
+            
+            const sub = l * a * c;
+            areaTotalProyecto += sub;
+            fila.querySelector(".subtotal").innerText = sub.toFixed(2) + " m²";
+        });
+
+        // Factor de aprovechamiento (0.85 es una media realista en carpintería)
+        const laminas = Math.ceil(areaTotalProyecto / (AREA_TABLERO * 0.85));
+
+        document.getElementById("totalM2").innerText = areaTotalProyecto.toFixed(2);
+        document.getElementById("totalLaminas").innerText = areaTotalProyecto > 0 ? laminas : 0;
+    }
+</script>
+
+</body>
+</html>
