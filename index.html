@@ -3,93 +3,246 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculador de Despiece - Cocinas & Modulares</title>
+    <title>Optimizador de Despiece - Harold</title>
     <style>
-        :root { --primary: #2563eb; --bg: #f8fafc; --text: #1e293b; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; }
-        .container { max-width: 800px; margin: auto; background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-        h1 { color: var(--primary); text-align: center; }
-        .info-tablero { background: #eff6ff; padding: 10px; border-radius: 8px; margin-bottom: 20px; font-weight: bold; text-align: center; border: 1px solid #dbeafe; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { padding: 12px; border-bottom: 1px solid #e2e8f0; text-align: left; }
-        input { width: 80px; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px; }
-        .btn { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; transition: 0.3s; width: 100%; font-size: 1rem; }
-        .btn:hover { background: #1d4ed8; }
-        .results { margin-top: 30px; padding: 20px; background: #f1f5f9; border-radius: 8px; }
-        .res-item { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 1.1rem; }
+        :root {
+            --primary: #2563eb;
+            --danger: #ef4444;
+            --success: #22c55e;
+            --bg: #f1f5f9;
+            --card: #ffffff;
+            --text: #0f172a;
+        }
+
+        * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+        
+        body { 
+            background-color: var(--bg); 
+            color: var(--text); 
+            margin: 0; 
+            padding: 10px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background: var(--card);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+        }
+
+        h1 { text-align: center; font-size: 1.5rem; color: var(--primary); margin-bottom: 5px; }
+        .subtitle { text-align: center; font-size: 0.9rem; color: #64748b; margin-bottom: 20px; }
+
+        .banner-info {
+            background: #dbeafe;
+            color: #1e40af;
+            padding: 12px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 20px;
+            border: 1px solid #bfdbfe;
+        }
+
+        /* Diseño de Tabla Responsive */
+        .table-container { overflow-x: auto; }
+        
+        table { width: 100%; border-collapse: collapse; min-width: 500px; }
+        th { background: #f8fafc; padding: 12px; text-align: left; font-size: 0.85rem; border-bottom: 2px solid #e2e8f0; }
+        td { padding: 10px; border-bottom: 1px solid #f1f5f9; }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        input:focus { border-color: var(--primary); ring: 2px solid #bfdbfe; }
+
+        /* Botones Adaptados a Táctil */
+        .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+        
+        .btn {
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-add { background: #64748b; color: white; }
+        .btn-calc { background: var(--primary); color: white; }
+        .btn:active { transform: scale(0.98); }
+
+        /* Resultados */
+        .results-card {
+            margin-top: 25px;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .res-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .res-val { font-weight: 800; color: var(--primary); font-size: 1.3rem; }
+        
+        .alert-error {
+            background: #fee2e2;
+            color: #b91c1c;
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 10px;
+            font-size: 0.85rem;
+            display: none;
+        }
+
+        /* Ajustes para Celular (Pantallas pequeñas) */
+        @media (max-width: 600px) {
+            .container { padding: 15px; }
+            th { display: none; } /* Ocultamos cabecera para diseño tipo card */
+            
+            tr { 
+                display: flex; 
+                flex-direction: column; 
+                border: 1px solid #e2e8f0; 
+                margin-bottom: 15px; 
+                padding: 10px; 
+                border-radius: 10px;
+            }
+            
+            td { display: flex; justify-content: space-between; align-items: center; border: none; padding: 5px 0; }
+            td::before { content: attr(data-label); font-weight: bold; font-size: 0.8rem; color: #64748b; }
+            
+            input { width: 60%; }
+            .actions { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>Calculador de Material</h1>
-    <div class="info-tablero">Constante del Tablero: 2.40m x 1.80m (4.32 m²)</div>
+    <h1>Calculadora de Despiece</h1>
+    <p class="subtitle">Optimización para Tabloides 2.40 x 1.80</p>
 
-    <table id="tablaPiezas">
-        <thead>
-            <tr>
-                <th>Pieza</th>
-                <th>Largo (m)</th>
-                <th>Ancho (m)</th>
-                <th>Cant.</th>
-                <th>Subtotal</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td><input type="text" placeholder="Ej: Lateral" style="width:120px"></td>
-                <td><input type="number" class="largo" step="0.01" value="0.00"></td>
-                <td><input type="number" class="ancho" step="0.01" value="0.00"></td>
-                <td><input type="number" class="cant" value="1"></td>
-                <td class="subtotal">0.00 m²</td>
-            </tr>
-        </tbody>
-    </table>
+    <div class="banner-info">
+        Material: 2.40m x 1.80m (4.32 m²)
+    </div>
 
-    <button class="btn" onclick="agregarFila()" style="margin: 15px 0; background: #64748b;">+ Agregar Pieza</button>
-    <button class="btn" onclick="calcularTodo()">CALCULAR DESPIECE</button>
+    <div class="table-container">
+        <table id="tablaPiezas">
+            <thead>
+                <tr>
+                    <th>Nombre Pieza</th>
+                    <th>Largo (m)</th>
+                    <th>Ancho (m)</th>
+                    <th>Cant.</th>
+                    <th>Total m²</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td data-label="Pieza"><input type="text" placeholder="Ej: Puerta"></td>
+                    <td data-label="Largo (m)"><input type="number" class="largo" step="0.01" value="0.00"></td>
+                    <td data-label="Ancho (m)"><input type="number" class="ancho" step="0.01" value="0.00"></td>
+                    <td data-label="Cantidad"><input type="number" class="cant" value="1"></td>
+                    <td data-label="Subtotal" class="subtotal">0.00</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 
-    <div class="results" id="resultadoArea">
-        <div class="res-item"><strong>Área Total Necesaria:</strong> <span id="totalM2">0.00</span> m²</div>
-        <div class="res-item"><strong>Láminas Sugeridas (Eficiencia 85%):</strong> <span id="totalLaminas" style="color:var(--primary); font-weight:bold;">0</span></div>
-        <p style="font-size: 0.85rem; color: #64748b; margin-top: 15px;">* Se incluye un 15% de margen por cortes (sierra de 3mm) y retales no aprovechables.</p>
+    <div id="error-msg" class="alert-error">⚠️ Una pieza excede las medidas del tabloide (2.40 x 1.80).</div>
+
+    <div class="actions">
+        <button class="btn btn-add" onclick="agregarFila()">+ Añadir Fila</button>
+        <button class="btn btn-calc" onclick="calcular()">CALCULAR AHORA</button>
+    </div>
+
+    <div class="results-card">
+        <div class="res-row">
+            <span>Área neta piezas:</span>
+            <span class="res-val"><span id="totalM2">0.00</span> m²</span>
+        </div>
+        <div class="res-row">
+            <span>Tableros necesarios:</span>
+            <span class="res-val" id="totalLaminas">0</span>
+        </div>
+        <p style="font-size: 0.8rem; color: #94a3b8; margin: 0;">* Incluye 15% de merma por corte y retales.</p>
     </div>
 </div>
 
 <script>
-    const AREA_TABLERO = 2.40 * 1.80; // 4.32 m2
+    const LARGO_TAB = 2.40;
+    const ANCHO_TAB = 1.80;
+    const AREA_TAB = LARGO_TAB * ANCHO_TAB;
 
     function agregarFila() {
         const tbody = document.querySelector("#tablaPiezas tbody");
-        const nuevaFila = tbody.insertRow();
-        nuevaFila.innerHTML = `
-            <td><input type="text" placeholder="Pieza" style="width:120px"></td>
-            <td><input type="number" class="largo" step="0.01" value="0.00"></td>
-            <td><input type="number" class="ancho" step="0.01" value="0.00"></td>
-            <td><input type="number" class="cant" value="1"></td>
-            <td class="subtotal">0.00 m²</td>
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td data-label="Pieza"><input type="text" placeholder="Pieza"></td>
+            <td data-label="Largo (m)"><input type="number" class="largo" step="0.01" value="0.00"></td>
+            <td data-label="Ancho (m)"><input type="number" class="ancho" step="0.01" value="0.00"></td>
+            <td data-label="Cantidad"><input type="number" class="cant" value="1"></td>
+            <td data-label="Subtotal" class="subtotal">0.00</td>
         `;
+        tbody.appendChild(tr);
     }
 
-    function calcularTodo() {
-        let areaTotalProyecto = 0;
+    function calcular() {
+        let totalArea = 0;
+        let hayError = false;
         const filas = document.querySelectorAll("#tablaPiezas tbody tr");
 
         filas.forEach(fila => {
             const l = parseFloat(fila.querySelector(".largo").value) || 0;
             const a = parseFloat(fila.querySelector(".ancho").value) || 0;
             const c = parseInt(fila.querySelector(".cant").value) || 0;
-            
+
+            // Validar si la pieza cabe (en cualquier sentido)
+            const cabeNormal = (l <= LARGO_TAB && a <= ANCHO_TAB);
+            const cabeRotada = (a <= LARGO_TAB && l <= ANCHO_TAB);
+
+            if ((l > 0 || a > 0) && !cabeNormal && !cabeRotada) {
+                hayError = true;
+                fila.style.background = "#fee2e2";
+            } else {
+                fila.style.background = "transparent";
+            }
+
             const sub = l * a * c;
-            areaTotalProyecto += sub;
-            fila.querySelector(".subtotal").innerText = sub.toFixed(2) + " m²";
+            totalArea += sub;
+            fila.querySelector(".subtotal").innerText = sub.toFixed(2);
         });
 
-        // Factor de aprovechamiento (0.85 es una media realista en carpintería)
-        const laminas = Math.ceil(areaTotalProyecto / (AREA_TABLERO * 0.85));
+        document.getElementById("error-msg").style.display = hayError ? "block" : "none";
+        
+        // Cálculo con 15% de desperdicio (factor 0.85)
+        const laminas = Math.ceil(totalArea / (AREA_TAB * 0.85));
 
-        document.getElementById("totalM2").innerText = areaTotalProyecto.toFixed(2);
-        document.getElementById("totalLaminas").innerText = areaTotalProyecto > 0 ? laminas : 0;
+        document.getElementById("totalM2").innerText = totalArea.toFixed(2);
+        document.getElementById("totalLaminas").innerText = totalArea > 0 ? laminas : 0;
     }
 </script>
 
